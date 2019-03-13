@@ -1,0 +1,26 @@
+#define N 10
+void main()
+{
+    int i,x,n,a[N];
+    printf("please input x:\n");
+    scanf("%d",&x);
+    printf("please input n(n<10):\n");
+    scanf("%d",&n);
+    printf("please input ai:\n");
+    for(i=0;i<=n;i++)
+    {
+        scanf("%d",&a[i]);
+    }
+    int sum=a[0],x0=x;
+    for(i=1;i<=n;i++)
+    {
+        sum=sum+a[i]*x;
+        x=x*x0;
+    }
+    printf("sum=%d",sum);
+}
+        sum=sum+a[i]*x;
+        x=x*x0;
+    }
+    printf("sum=%d",sum);
+}
