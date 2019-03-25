@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct node
+{
+    int data;
+    int num;
+    struct node* next;
+}LinkList;
+
+LinkList* create(int n)
+{
+    LinkList *head,*p,*q;
+    printf(" ‰»Î√‹¬Î£∫");
+    for(int i=1;i<=n;i++)
+    {
+        p=(LinkList*)malloc(sizeof(LinkList));
+        scanf("%d",&p->data);
+        p->num=i;
+        if(i==1)
+        {
+            head=p;
+            q=p;
+        }
+        p->next=head;
+        q->next=p;
+        q=p;
+    }
+    return head;
+}
+
+void function(LinkList *p,int *a,int n,int m)
+{
+    int i,nn,j;
+    LinkList *q;
+    for(i=0;i<n-1;i++)
+    {
+        nn=n-i;
+        m=m%nn;
+        if (m==0) m=nn;
+
+        if(m==1)
+        {
+            q=p->next;
+            while(q->next!=p) q=q->next;
+            a[i]=p->num;
+            m=p->data;
+            q->next=q->next->next;
+            p=q->next;
+        }
+
+        else
+        {
+            for(j=0;j<m-1;j++)
+            {
+                p=p->next;
+            }
+            q=p->next;
+            while(q->next!=p) q=q->next;
+            a[i]=p->num;
+            m=p->data;
+            q->next=q->next->next;
+            p=q->next;
+        }
+    }
+    a[n-1]=p->num;
+}
+void main()
+{
+   LinkList *head;
+   int i,m,n;
+   printf("«Î ‰»În:\n");
+   scanf("%d",&n);
+   printf("«Î ‰»Îm:\n");
+   scanf("%d",&m);
+   head=create(n);
+   int a[10]={0};
+   function(head,a,n,m);
+   printf(" ‰≥ˆÀ≥–Ú£∫");
+   for(i=0;i<n-1;i++)
+   {
+       printf("%d ",a[i]);
+   }
+   printf("%d\n",a[n-1]);
+}
