@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define n 4
+int sum=0;
+typedef struct
+{
+    int *base;
+    int *top;
+}Stack;
+void InitStack(Stack &s)
+{
+    s.base=(int*)malloc(n*sizeof(int));
+    s.top=s.base;
+}
+void push(Stack &s,int e)
+{
+    *s.top++=e;
+}
+void pop(Stack &s,int &e)
+{
+    e=*--s.top;
+}
+int Empty(Stack s)
+{
+   if(s.base==s.top)
+        return 1;
+   else
+   {
+       return 0;
+   }
+}
+void Do(Stack s,int next,int *a,int k)
+{
+    int e;
+    if(Empty(s)&&next==n+1)
+    {
+        sum++;
+        int i;
+        for (i=1;i<=n;i++) printf("%2d",a[i]);printf("\n");
+    }
+    if(!Empty(s))
+    {
+        pop(s,e);
+        a[k+1]=e;
+        Do(s,next,a,k+1);
+        push(s,e);
+    }
+    if(next<=n)
+    {
+        push(s,next);
+        Do(s,next+1,a,k);
+        pop(s,e);
+    }
+}
+int main()
+{
+    int a[n+1];
+    Stack s;
+    InitStack(s);
+    Do(s,1,a,0);
+    printf("sum=%d\n",sum);
+    return 0;
+}
