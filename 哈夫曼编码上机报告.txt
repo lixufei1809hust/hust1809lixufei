@@ -1,0 +1,205 @@
+实习报告（哈夫曼编码）
+电信1809 李旭飞 U201813483 完成日期 2019/04/25
+1.需求分析
+任务：建立哈夫曼树并编码和译码
+输入：权值和需要翻译的密码
+输出：哈夫曼树（非直观），编码和译码
+功能：提高信道利用率
+
+
+
+2.概要设计
+通过顺序表构建哈夫曼树，每个节点存双亲，左孩子，右孩子和权值
+从根节点开始，向左为0，向右为1直到叶子节点，编码
+将密码翻译
+
+
+3.详细设计
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+typedef struct
+{
+    int weight;
+    int parent,lchild,rchild;
+}HTNode,*HuffmanTree;   //建立结点
+typedef char ** HuffmanCode;      //二级指针存数组
+void Select(HuffmanTree HT,int n,int &s1,int &s2)//  Select功能是从parent不为0的结点中选出权值最小的两个的序号，分别为
+{                                                                            //   s1,s2（s1<s2）
+    int last1=100;  // 根据权值不同设数，方便比较
+    int last2=100,i,last3,last4;
+    for(i=1;i<=n;i++)
+    {
+        if(HT[i].parent==0)
+        {
+            if(HT[i].weight<last1)
+            {
+                last1=HT[i].weight;    //找出最小值的序号赋给last3
+                last3=i;
+            }
+        }
+    }
+    for(i=1;i<=n;i++)
+    {
+        if(HT[i].parent==0)
+        {
+            if(HT[i].weight<last2&&HT[i].weight>last1)  // 找出第二小值的序号赋给last4
+            {
+                last2=HT[i].weight;
+                last4=i;
+            }
+        }
+    }
+    s1=last3;//赋值s1和s2
+    s2=last4;
+}
+void HuffmanCoding(HuffmanTree &HT,HuffmanCode &HC,int *w,int n)  //创建Huffman树并编码
+{
+    if(n<=1)return; //无法构成树
+    int m=2*n-1,i,s1=0,s2=0,start,c,f;      //哈夫曼树有（2*n-1）个结点
+    HT=(HuffmanTree)malloc((m+1)*sizeof(HTNode));//  0号单元不用
+    HuffmanTree p;
+    for(p=HT+1,i=1;i<=n;++i,++p,++w)//给叶子结点parent,lchild,rchild 赋值
+    {
+        p->weight=*w;
+        p->lchild=p->rchild=p->parent=0;
+        //printf("%d\n",p->weight);
+    }
+    for(i=n+1,p=HT+n+1;i<=m;i++,p++)// 给双亲节点赋值
+    {
+        p->lchild=p->parent=p->rchild=0;
+    }
+    for(i=n+1;i<=m;++i)//构建哈夫曼树，每次选出最小两个权值，用剩余的n-1个结点空间存parent
+    {
+        Select(HT,i-1,s1,s2);
+        //printf("%5d%5d\n",s1,s2);
+        HT[s1].parent=i;  HT[s2].parent=i;
+        HT[i].lchild=s1;  HT[i].rchild=s2;
+        HT[i].weight=HT[s1].weight+HT[s2].weight;
+        //printf("%5d",HT[i].weight);
+    }
+    printf("     weight    parent   lchild  rchild\n");
+    for(i=1;i<=m;i++)
+    {
+        printf("%d%7d%10d%10d%7d\n",i,HT[i].weight,HT[i].parent,HT[i].lchild,HT[i].rchild);//将HT终态打印
+    }
+    // 从叶子到根逆向求每个字符的哈夫曼编码
+    HC=(HuffmanCode)malloc((n+1)*sizeof(char *));//分配n个字符编码的头指针向量
+    char *cd=(char*)malloc(n*sizeof(char));//分配求编码的工作空间
+    cd[n-1]='\0';                   // 编码结束符
+    for(i=1;i<=n;i++)     //逐个字符求哈夫曼编码
+    {
+        start=n-1;
+        for(c=i,f=HT[i].parent;f!=0;c=f,f=HT[f].parent)//从叶子到根逆向求编码，根为parent=0的结点
+        {
+            if(HT[f].lchild==c)
+                cd[--start]='0';
+            else
+                cd[--start]='1';
+        }
+        HC[i]=(char*)malloc((n-start)*sizeof(char));//为第i个字符编码分配空间
+        strcpy(HC[i],&cd[start]);//从cd复制编码到HC
+    }
+    free(cd);
+}
+
+void Decoding(HuffmanTree &HT,char *file,int *w)//译码，file数组中存密码，w中存字符（此处用权值代替）
+{
+    int i=0,k=1;
+    while(HT[k].parent!=0) k++;//找到parent=0即根结点位置
+    while(file[i]!='\0')
+    {
+        int j=k;
+        while(HT[j].lchild!=0||HT[j].rchild!=0)//终止条件为找到叶子结点，i处为0，则找左孩子，为1，则找右孩子
+        {
+            if(file[i]=='0')
+            {
+                j=HT[j].lchild;
+            }
+            else
+            {
+                j=HT[j].rchild;
+            }
+            i++;
+        }
+        printf("%10d",w[j-1]);//每找到一个叶子结点，打印字符
+    }
+
+}
+int main()
+{
+    int i=1;
+    char file[]="110111000111000110101011001";
+    HuffmanTree HT;
+    HuffmanCode HC;
+    int w[8]={5,29,7,8,14,23,3,11};
+    HuffmanCoding(HT,HC,w,8);
+    printf("\n");
+    printf("哈夫曼编码为：\n");
+    for(i=1;i<=8;i++)
+    {
+        printf("%5d:",i);
+        puts(HC[i]);
+        printf("\n");
+    }
+    printf("译码为:\n");
+    Decoding(HT,file,w);
+    return 0;
+}
+
+
+
+
+
+4.调试分析
+最终结果不对时在多个地方printf一下，看是否符合中间的流程
+如打印s1,s2的值，打印双亲的权值等等
+
+
+
+
+5.用户使用说明：无
+
+
+
+
+6.exp：运行
+权值为5,29,7,8,14,23,3,11
+密码为110111000111000110101011001时
+结果如下：    
+  weight    parent   lchild  rchild
+1      5         9         0      0
+2     29        14         0      0
+3      7        10         0      0
+4      8        10         0      0
+5     14        12         0      0
+6     23        13         0      0
+7      3         9         0      0
+8     11        11         0      0
+9      8        11         7      1
+10     15        12         3      4
+11     19        13         9      8
+12     29        15         5     10
+13     42        14        11      6
+14     71        15         2     13
+15    100         0        12     14
+
+哈夫曼编码为：
+    1:11001
+
+    2:10
+
+    3:010
+
+    4:011
+
+    5:00
+
+    6:111
+
+    7:11000
+
+    8:1101
+
+译码为:
+        11         3        23        14         8         7        29         5
